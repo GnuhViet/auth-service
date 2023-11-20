@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:E:/data/sample
+    url: jdbc:h2:file:G:/data/auth_service
     username: sa
     password: password
     driver-class-name: org.h2.Driver
@@ -13,4 +13,14 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger
+
+# App properties
+app:
+  base-uri: http://localhost:8080/
+  name: my-blog
+  jwt-secret: 413F4428472B4B6250645367566B5970337336763979244226452948404D6351
+  #  jwt-expiration-ms: 60000 #1 min
+  #  jwt-refresh-expiration-ms: 120000 #2 min
+  jwt-expiration-ms: 3600000
+  jwt-refresh-expiration-ms: 86400000
 

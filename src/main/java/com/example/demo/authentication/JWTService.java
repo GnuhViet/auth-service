@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,19 +28,25 @@ public class JWTService {
     private String INJECTED_SECRET_KEY;
     private int JWT_EXPIRATION_MS;
     private int JWT_REFRESH_EXPIRATION_MS;
+    private int RSA_KEY_LENGTH;
     private String ISSUER;
+
+    private KeyPair keyPair;
 
     @Autowired
     public JWTService(
             @Value("${app.jwt-secret}") String INJECTED_SECRET_KEY,
             @Value("${app.jwt-expiration-ms}") int JWT_EXPIRATION_MS,
             @Value("${app.jwt-refresh-expiration-ms}") int JWT_REFRESH_EXPIRATION_MS,
+            @Value("${app.rsa-key-length}") int RSA_KEY_LENGTH,
             @Value("${app.name}") String ISSUER
     ) {
         this.INJECTED_SECRET_KEY = INJECTED_SECRET_KEY;
         this.JWT_EXPIRATION_MS = JWT_EXPIRATION_MS;
         this.JWT_REFRESH_EXPIRATION_MS = JWT_REFRESH_EXPIRATION_MS;
+        this.RSA_KEY_LENGTH = RSA_KEY_LENGTH;
         this.ISSUER = ISSUER;
+        keyPair = getSignKey();
     }
 
 
@@ -57,7 +66,7 @@ public class JWTService {
         private DecodedToken(Claims claims) throws MalformedJwtException {
 
             @SuppressWarnings("unchecked")
-            List<String> rawRoles = (List<String>) claims.get("roles");
+            var rawRoles = (List<String>) claims.get("roles");
 
             userId = claims.getSubject();
             expiration = claims.getExpiration();
@@ -81,7 +90,7 @@ public class JWTService {
 
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(getSignKey())
+                    .setSigningKey(keyPair.getPublic())
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
@@ -134,7 +143,7 @@ public class JWTService {
     private Claims extractAllClaims(String token) throws MalformedJwtException {
         return Jwts
                 .parserBuilder()
-                .setSigningKey(getSignKey())
+                .setSigningKey(keyPair.getPublic())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -175,11 +184,17 @@ public class JWTService {
                 .setIssuer(ISSUER)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
-    private Key getSignKey() {
-        return Keys.hmacShaKeyFor(Objects.requireNonNull(INJECTED_SECRET_KEY).getBytes(StandardCharsets.UTF_8));
+    private KeyPair getSignKey() {
+        try {
+            var keyGen = KeyPairGenerator.getInstance("RSA");
+            keyGen.initialize(RSA_KEY_LENGTH);
+            return keyGen.genKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
     }
 }

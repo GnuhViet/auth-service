@@ -24,4 +24,5 @@ app:
   #  jwt-refresh-expiration-ms: 120000 #2 min
   jwt-expiration-ms: 3600000
   jwt-refresh-expiration-ms: 86400000
+  rsa-key-length: 2048
 

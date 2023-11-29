@@ -20,13 +20,6 @@ import java.util.Map;
 @ControllerAdvice
 public class AuthenticationExceptionHandler extends ResponseEntityExceptionHandler {
 
-    // @ExceptionHandler(AuthenticationException.class)
-    // protected ResponseEntity<Object> handleAuthentication(AuthenticationException ex) {
-    //     ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED);
-    //     apiError.setMessage(ex.getMessage() + "custom");
-    //     return RestExceptionHandler.buildResponseEntity(apiError);
-    // }
-
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
         ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED);
@@ -43,7 +36,7 @@ public class AuthenticationExceptionHandler extends ResponseEntityExceptionHandl
             errors.put(fieldName, errorMessage);
         });
 
-        ApiError apiError = new ApiError(HttpStatus.CONFLICT);
+        var apiError = new ApiError(HttpStatus.CONFLICT);
         apiError.setMessage(ex.getMessage());
         apiError.setSubErrors(List.of(new ApiValidationError(errors)));
         return RestExceptionHandler.buildResponseEntity(apiError);

@@ -28,6 +28,7 @@ public class JWTService {
     private String INJECTED_SECRET_KEY;
     private int JWT_EXPIRATION_MS;
     private int JWT_REFRESH_EXPIRATION_MS;
+    private String JWT_ALG;
     private int RSA_KEY_LENGTH;
     private String ISSUER;
 
@@ -38,17 +39,18 @@ public class JWTService {
             @Value("${app.jwt-secret}") String INJECTED_SECRET_KEY,
             @Value("${app.jwt-expiration-ms}") int JWT_EXPIRATION_MS,
             @Value("${app.jwt-refresh-expiration-ms}") int JWT_REFRESH_EXPIRATION_MS,
+            @Value("${app.jwt-alg}") String JWT_ALG,
             @Value("${app.rsa-key-length}") int RSA_KEY_LENGTH,
             @Value("${app.name}") String ISSUER
     ) {
         this.INJECTED_SECRET_KEY = INJECTED_SECRET_KEY;
         this.JWT_EXPIRATION_MS = JWT_EXPIRATION_MS;
         this.JWT_REFRESH_EXPIRATION_MS = JWT_REFRESH_EXPIRATION_MS;
+        this.JWT_ALG = JWT_ALG;
         this.RSA_KEY_LENGTH = RSA_KEY_LENGTH;
         this.ISSUER = ISSUER;
         keyPair = getSignKey();
     }
-
 
     public enum TokenType {
         access,
@@ -190,7 +192,7 @@ public class JWTService {
 
     private KeyPair getSignKey() {
         try {
-            var keyGen = KeyPairGenerator.getInstance("RSA");
+            var keyGen = KeyPairGenerator.getInstance(JWT_ALG);
             keyGen.initialize(RSA_KEY_LENGTH);
             return keyGen.genKeyPair();
         } catch (NoSuchAlgorithmException e) {

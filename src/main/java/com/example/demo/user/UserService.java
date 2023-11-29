@@ -3,7 +3,7 @@ package com.example.demo.user;
 import com.example.demo.aspect.exception.EmptyRequestBodyException;
 import com.example.demo.authentication.dtos.DetailsAppUserDTO;
 import com.example.demo.authentication.model.UserProfileRequest;
-import com.example.demo.user.constans.Constants;
+import com.example.demo.user.constans.UserRoles;
 import com.example.demo.user.entities.AppUser;
 import com.example.demo.user.entities.Role;
 import com.example.demo.user.exceptions.UserAlreadyHaveRoleException;
@@ -133,7 +133,7 @@ public class UserService implements UserDetailsService {
             if (!existByUsername(u)) {
                 throw new UsernameNotFoundException("User: " + u +" not found");
             }
-            addRoleToUser(u, Constants.ROLE_ADMIN);
+            addRoleToUser(u, UserRoles.ROLE_ADMIN);
         });
     }
 

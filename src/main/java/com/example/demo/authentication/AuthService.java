@@ -5,7 +5,7 @@ import com.example.demo.authentication.dtos.SimpleAppUserDTO;
 import com.example.demo.authentication.exceptions.RegisterExceptionBuilder;
 import com.example.demo.authentication.model.*;
 import com.example.demo.user.entities.AppUser;
-import com.example.demo.user.constans.Constants;
+import com.example.demo.user.constans.UserRoles;
 import com.example.demo.user.UserService;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,7 @@ public class AuthService {
 
         try {
             userService.saveUser(user);
-            userService.addRoleToUser(user.getUsername(), Constants.ROLE_USER);
+            userService.addRoleToUser(user.getUsername(), UserRoles.ROLE_USER);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

@@ -1,4 +1,4 @@
-package com.example.demo.user;
+package com.example.demo.user.constans;
 
 public enum UserStatus {
     Active(Constants.ACTIVE),

@@ -1,4 +1,4 @@
-package com.example.demo.authentication.exceptions;
+package com.example.demo.user.exceptions;
 
 import lombok.Getter;
 

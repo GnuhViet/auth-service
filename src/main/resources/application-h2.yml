@@ -13,7 +13,8 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger
-
+    csrf:
+      enabled: true
 # App properties
 app:
   base-uri: http://localhost:8080/

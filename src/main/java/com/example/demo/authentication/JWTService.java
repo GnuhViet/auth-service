@@ -1,7 +1,7 @@
 package com.example.demo.authentication;
 
 import com.example.demo.authentication.dtos.DetailsAppUserDTO;
-import com.example.demo.user.Role;
+import com.example.demo.user.entities.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -46,12 +46,13 @@ public class JWTService {
         refresh
     }
 
-    public class DecodedToken {
-        @Getter private final String userId;
-        @Getter private final String[] roles;
-        @Getter private final Date expiration;
-        @Getter private final String issuer;
-        @Getter private final Date issuerAt;
+    @Getter
+    public static class DecodedToken {
+        private final String userId;
+        private final String[] roles;
+        private final Date expiration;
+        private final String issuer;
+        private final Date issuerAt;
 
         private DecodedToken(Claims claims) throws MalformedJwtException {
 

@@ -1,5 +1,6 @@
-package com.example.demo.user;
+package com.example.demo.user.entities;
 
+import com.example.demo.user.constans.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

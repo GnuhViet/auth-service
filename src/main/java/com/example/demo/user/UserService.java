@@ -1,9 +1,14 @@
 package com.example.demo.user;
 
+import com.example.demo.aspect.exception.EmptyRequestBodyException;
 import com.example.demo.authentication.dtos.DetailsAppUserDTO;
-import com.example.demo.authentication.exceptions.EmptyRequestBodyException;
-import com.example.demo.authentication.exceptions.UserAlreadyHaveRoleException;
 import com.example.demo.authentication.model.UserProfileRequest;
+import com.example.demo.user.constans.Constants;
+import com.example.demo.user.entities.AppUser;
+import com.example.demo.user.entities.Role;
+import com.example.demo.user.exceptions.UserAlreadyHaveRoleException;
+import com.example.demo.user.repo.RoleRepo;
+import com.example.demo.user.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;

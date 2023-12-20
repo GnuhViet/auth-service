@@ -54,7 +54,9 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(AUTH_WHITELIST).permitAll()
-                // .anyRequest().authenticated()
+                .requestMatchers("/api/v1/auth/email/validate").authenticated()
+                .requestMatchers("/api/v1/auth/email/confirm").authenticated()
+                .anyRequest().authenticated()
         );
 
         http.sessionManagement(session -> session

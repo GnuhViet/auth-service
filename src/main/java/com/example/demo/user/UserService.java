@@ -4,6 +4,7 @@ import com.example.demo.aspect.exception.EmptyRequestBodyException;
 import com.example.demo.authentication.dtos.DetailsAppUserDTO;
 import com.example.demo.authentication.model.UserProfileRequest;
 import com.example.demo.user.constans.UserRoles;
+import com.example.demo.user.constans.UserStatus;
 import com.example.demo.user.entities.AppUser;
 import com.example.demo.user.entities.Role;
 import com.example.demo.user.exceptions.UserAlreadyHaveRoleException;
@@ -137,6 +138,12 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    public void setUserActive(String userId) {
+        Objects.requireNonNull(userId, "User id must not be null");
+        AppUser user = loadAppUserByUserid(userId);
+        user.setStatus(UserStatus.Active.name());
+    }
+
     public DetailsAppUserDTO addRoleToUser(String username, String roleName) {
         Objects.requireNonNull(username, "Username must not be null");
         Objects.requireNonNull(roleName, "Role name must not be null");
@@ -181,8 +188,8 @@ public class UserService implements UserDetailsService {
         return userRepo.existsByUsername(username);
     }
 
-    public boolean existByEmail() {
-        return false;
+    public boolean existByEmail(String email) {
+        return userRepo.existsByEmail(email);
     }
 
     public boolean existByPhone() {

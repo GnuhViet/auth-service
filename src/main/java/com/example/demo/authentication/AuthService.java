@@ -2,8 +2,12 @@ package com.example.demo.authentication;
 
 import com.example.demo.authentication.dtos.DetailsAppUserDTO;
 import com.example.demo.authentication.dtos.SimpleAppUserDTO;
+import com.example.demo.authentication.entities.ConfirmToken;
 import com.example.demo.authentication.exceptions.RegisterExceptionBuilder;
+import com.example.demo.authentication.exceptions.TokenAttemptsException;
 import com.example.demo.authentication.model.*;
+import com.example.demo.authentication.repo.ConfirmTokenRepo;
+import com.example.demo.user.constans.UserStatus;
 import com.example.demo.user.entities.AppUser;
 import com.example.demo.user.constans.UserRoles;
 import com.example.demo.user.UserService;
@@ -15,12 +19,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
+    private static final int CONFIRM_TOKEN_LENGTH = 6;
+    private static final int TOKEN_EXPIRED_MINUTE = 15;
     private final UserService userService;
+    private final ConfirmTokenRepo tokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -32,6 +43,9 @@ public class AuthService {
             exceptionBuilder.addFieldError("username", "username.exists", "Username already exists");
         }
         // if exist by email...
+        if (userService.existByEmail(request.getEmail())) {
+            exceptionBuilder.addFieldError("email", "email.used", "Email has been use");
+        }
 
         if (!exceptionBuilder.isEmptyError()) {
             throw exceptionBuilder
@@ -42,17 +56,70 @@ public class AuthService {
         AppUser user = AppUser.builder()
                 .fullName(request.getFullName())
                 .username(request.getUsername())
+                .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .status(UserStatus.Inactive.name())
                 .build();
+
+        ConfirmToken token = generateConfirmToken(user);
+        log.info(token.getToken());
 
         try {
             userService.saveUser(user);
             userService.addRoleToUser(user.getUsername(), UserRoles.ROLE_USER);
+            tokenRepo.save(token);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
 
-        return generateToken(userService.getUserid(request.getUsername()));
+        return generateJWTToken(userService.getUserid(request.getUsername()));
+    }
+
+    @Transactional
+    public void sendConfirmToken(String userID) {
+        ConfirmToken dbToken = tokenRepo
+                .findByAppUser_Id(userID).orElseThrow();
+        tokenRepo.delete(dbToken);
+        tokenRepo.flush();
+
+        ConfirmToken token = generateConfirmToken(userService.getReferenceById(userID));
+        tokenRepo.save(token);
+        log.info("new token send: " + token.getToken());
+        //TODO send email
+    }
+
+    @Transactional(noRollbackFor = TokenAttemptsException.class)
+    public boolean validateEmailToken(String requestToken, String userID) {
+
+        ConfirmToken dbToken = tokenRepo
+                .findByAppUser_Id(userID).orElseThrow(() -> new TokenAttemptsException("Please resend token"));
+
+        if (!dbToken.getToken().equals(requestToken)) {
+            if (dbToken.getAttempts() > 5) {
+                tokenRepo.delete(dbToken);
+                throw new TokenAttemptsException("Please resend token");
+            }
+            dbToken.setAttempts(dbToken.getAttempts() + 1);
+            return false;
+        }
+
+        userService.setUserActive(userID);
+        tokenRepo.delete(dbToken);
+        return true;
+    }
+
+    private static ConfirmToken generateConfirmToken(AppUser user) {
+
+        StringBuilder sb = new StringBuilder(CONFIRM_TOKEN_LENGTH);
+        new Random().ints(CONFIRM_TOKEN_LENGTH, 0, 10).forEach(sb::append);
+
+        return ConfirmToken.builder()
+                .token(sb.toString())
+                .createAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusMinutes(TOKEN_EXPIRED_MINUTE))
+                .attempts(0)
+                .appUser(user)
+                .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws AuthenticationException {
@@ -63,7 +130,7 @@ public class AuthService {
                 )
         );
 
-        return generateToken(userService.getUserid(request.getUsername()));
+        return generateJWTToken(userService.getUserid(request.getUsername()));
     }
 
     public AuthenticationResponse refreshToken(RefreshRequest request) throws MalformedJwtException {
@@ -77,7 +144,7 @@ public class AuthService {
                 .build();
     }
 
-    private AuthenticationResponse generateToken(String userId) {
+    private AuthenticationResponse generateJWTToken(String userId) {
         DetailsAppUserDTO user = userService.getUserDto(userId, DetailsAppUserDTO.class);
 
         return AuthenticationResponse.builder()

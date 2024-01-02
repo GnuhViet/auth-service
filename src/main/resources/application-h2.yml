@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:G:/data/auth_service
+    url: jdbc:h2:file:E:/data/auth_service
     username: sa
     password: password
     driver-class-name: org.h2.Driver

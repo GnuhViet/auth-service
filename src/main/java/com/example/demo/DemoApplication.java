@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.authentication.dtos.DetailsAppUserDTO;
+import com.example.demo.user.constans.UserStatus;
 import com.example.demo.user.entities.AppUser;
 import com.example.demo.user.entities.Role;
 import com.example.demo.user.UserService;
@@ -46,6 +47,7 @@ public class DemoApplication {
 			user.add(userService.saveUser(AppUser.builder()
 					.username("user")
 					.password(passwordEncoder.encode("string"))
+					.status(UserStatus.Inactive.name())
 					.build()
 			));
 

@@ -27,4 +27,11 @@ public class RegisteredRequest {
             message = "password must be min 4 and max 12 length containing at least 1 uppercase, 1 lowercase, 1 special character and 1 digit")
     @NotBlank(message = "Password is mandatory")
     private String password;
+
+    //https://www.baeldung.com/java-email-validation-regex
+    @Pattern(regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+            + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$",
+            message = "email is invalid")
+    @NotBlank(message = "Email is mandatory")
+    private String email;
 }

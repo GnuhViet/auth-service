@@ -3,6 +3,7 @@ package com.example.demo.aspect.exceptionhandler;
 import com.example.demo.aspect.error.ApiError;
 import com.example.demo.aspect.error.ApiValidationError;
 import com.example.demo.authentication.exceptions.RegisterException;
+import com.example.demo.authentication.exceptions.TokenAttemptsException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,13 @@ public class AuthenticationExceptionHandler extends ResponseEntityExceptionHandl
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handleBadCredentialsException(BadCredentialsException ex) {
         ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED);
+        apiError.setMessage(ex.getMessage());
+        return RestExceptionHandler.buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(TokenAttemptsException.class)
+    protected ResponseEntity<Object> handleTokenAttemptsException(TokenAttemptsException ex) {
+        ApiError apiError = new ApiError(HttpStatus.LOCKED);
         apiError.setMessage(ex.getMessage());
         return RestExceptionHandler.buildResponseEntity(apiError);
     }

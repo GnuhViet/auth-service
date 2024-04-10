@@ -30,28 +30,28 @@ public class DemoApplication {
 	CommandLineRunner run(UserService userService
 	) {
 		return args -> {
-			List<DetailsAppUserDTO> user = new ArrayList<>();
-
-			userService.saveRole(new Role(null, "ROLE_USER"));
-			userService.saveRole(new Role(null, "ROLE_ADMIN"));
-
-			user.add(userService.saveUser(AppUser.builder()
-					.username("string")
-					.password(passwordEncoder.encode("string"))
-					.build()
-			));
-
-			userService.addRoleToUser("string", "ROLE_USER");
-			userService.addRoleToUser("string", "ROLE_ADMIN");
-
-			user.add(userService.saveUser(AppUser.builder()
-					.username("user")
-					.password(passwordEncoder.encode("string"))
-					.status(UserStatus.Inactive.name())
-					.build()
-			));
-
-			userService.addRoleToUser("user", "ROLE_USER");
+			// List<DetailsAppUserDTO> user = new ArrayList<>();
+			//
+			// userService.saveRole(new Role(null, "ROLE_USER"));
+			// userService.saveRole(new Role(null, "ROLE_ADMIN"));
+			//
+			// user.add(userService.saveUser(AppUser.builder()
+			// 		.username("string")
+			// 		.password(passwordEncoder.encode("string"))
+			// 		.build()
+			// ));
+			//
+			// userService.addRoleToUser("string", "ROLE_USER");
+			// userService.addRoleToUser("string", "ROLE_ADMIN");
+			//
+			// user.add(userService.saveUser(AppUser.builder()
+			// 		.username("user")
+			// 		.password(passwordEncoder.encode("string"))
+			// 		.status(UserStatus.Inactive.name())
+			// 		.build()
+			// ));
+			//
+			// userService.addRoleToUser("user", "ROLE_USER");
 
 
 			log.info("Finish test data initial");

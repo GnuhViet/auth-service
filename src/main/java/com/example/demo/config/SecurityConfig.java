@@ -52,6 +52,8 @@ public class SecurityConfig {
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
         );
 
+        // http.csrf(AbstractHttpConfigurer::disable);
+
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(AUTH_WHITELIST).permitAll()
                 .requestMatchers("/api/v1/auth/email/validate").authenticated()

@@ -2,10 +2,7 @@ package com.example.demo.authentication;
 
 import com.example.demo.authentication.dtos.DetailsAppUserDTO;
 import com.example.demo.user.entities.Role;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +29,8 @@ public class JWTService {
     private int RSA_KEY_LENGTH;
     private String ISSUER;
 
-    private KeyPair keyPair;
+    private KeyPair rsaSignKey;
+    private Key hs256SignKey;
 
     @Autowired
     public JWTService(
@@ -49,7 +47,8 @@ public class JWTService {
         this.JWT_ALG = JWT_ALG;
         this.RSA_KEY_LENGTH = RSA_KEY_LENGTH;
         this.ISSUER = ISSUER;
-        keyPair = getSignKey();
+        rsaSignKey = getRSASignKey();
+        hs256SignKey = getHS256SignKey();
     }
 
     public enum TokenType {
@@ -91,8 +90,7 @@ public class JWTService {
     public boolean isTokenValid(String token) {
 
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(keyPair.getPublic())
+            getJwtParserBuilder()
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
@@ -143,9 +141,7 @@ public class JWTService {
     }
 
     private Claims extractAllClaims(String token) throws MalformedJwtException {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(keyPair.getPublic())
+        return getJwtParserBuilder()
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -179,18 +175,40 @@ public class JWTService {
             default -> expirationMs = 0;
         }
 
-        return Jwts
-                .builder()
+        return getJwtBuilder()
                 .setClaims(extraClaims)
                 .setSubject(subject)
                 .setIssuer(ISSUER)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
-    private KeyPair getSignKey() {
+    private JwtBuilder getJwtBuilder() {
+        if ("RSA".equals(JWT_ALG)) {
+            return Jwts.builder()
+                    .signWith(rsaSignKey.getPrivate(), SignatureAlgorithm.RS256);
+        }
+        if ("HS256".equals(JWT_ALG)) {
+            return Jwts.builder()
+                    .signWith(hs256SignKey, SignatureAlgorithm.HS256);
+        }
+        throw new IllegalArgumentException("Invalid JWT_ALG");
+    }
+
+    private JwtParserBuilder getJwtParserBuilder() {
+        if ("RSA".equals(JWT_ALG)) {
+            return Jwts.parserBuilder()
+                    .setSigningKey(rsaSignKey.getPublic());
+        }
+        if ("HS256".equals(JWT_ALG)) {
+            return Jwts.parserBuilder()
+                    .setSigningKey(hs256SignKey);
+        }
+        throw new IllegalArgumentException("Invalid JWT_ALG");
+    }
+
+    private KeyPair getRSASignKey() {
         try {
             var keyGen = KeyPairGenerator.getInstance(JWT_ALG);
             keyGen.initialize(RSA_KEY_LENGTH);
@@ -198,5 +216,9 @@ public class JWTService {
         } catch (NoSuchAlgorithmException e) {
             return null;
         }
+    }
+
+    private Key getHS256SignKey() {
+        return Keys.hmacShaKeyFor(Objects.requireNonNull(INJECTED_SECRET_KEY).getBytes(StandardCharsets.UTF_8));
     }
 }

@@ -7,6 +7,8 @@ import com.example.demo.authentication.exceptions.RegisterExceptionBuilder;
 import com.example.demo.authentication.exceptions.TokenAttemptsException;
 import com.example.demo.authentication.model.*;
 import com.example.demo.authentication.repo.ConfirmTokenRepo;
+import com.example.demo.email.EmailSender;
+import com.example.demo.email.EmailService;
 import com.example.demo.user.constans.UserStatus;
 import com.example.demo.user.entities.AppUser;
 import com.example.demo.user.constans.UserRoles;
@@ -35,6 +37,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailSender emailSender;
 
     public AuthenticationResponse register(RegisteredRequest request) throws AuthenticationException {
         RegisterExceptionBuilder exceptionBuilder = new RegisterExceptionBuilder();
@@ -82,10 +85,14 @@ public class AuthService {
         tokenRepo.delete(dbToken);
         tokenRepo.flush();
 
+
         ConfirmToken token = generateConfirmToken(userService.getReferenceById(userID));
         tokenRepo.save(token);
         log.info("new token send: " + token.getToken());
-        //TODO send email
+
+        String email = userService.getUserEmail(userID);
+
+        emailSender.send(email, token.getToken());
     }
 
     @Transactional(noRollbackFor = TokenAttemptsException.class)

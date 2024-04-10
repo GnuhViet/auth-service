@@ -4,6 +4,8 @@ import com.example.demo.authentication.model.AuthenticationRequest;
 import com.example.demo.authentication.model.AuthenticationResponse;
 import com.example.demo.authentication.model.RefreshRequest;
 import com.example.demo.authentication.model.RegisteredRequest;
+import com.example.demo.email.EmailSender;
+import com.example.demo.email.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;

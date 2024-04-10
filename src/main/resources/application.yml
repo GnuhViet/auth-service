@@ -1,21 +1,27 @@
+#server:
+#  port: 8083
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/auth_service
+    url: jdbc:mysql://localhost:3307/taskhup
     username: root
-    password: root
+    password: example_password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
-  profiles:
-    active: h2
-
+    show-sql: true
+#  profiles:
+#    active: h2
+#logging:
+#  level:
+#    root: debug
 springdoc:
   swagger-ui:
     path: /swagger
-
+    csrf:
+      enabled: true
 # App properties
 app:
   base-uri: http://localhost:8080/
@@ -25,3 +31,5 @@ app:
   #  jwt-refresh-expiration-ms: 120000 #2 min
   jwt-expiration-ms: 3600000
   jwt-refresh-expiration-ms: 86400000
+  jwt-alg: HS256 #RSA #HS256
+  rsa-key-length: 2048

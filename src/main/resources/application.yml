@@ -9,13 +9,27 @@ spring:
       ddl-auto: create
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
-  profiles:
-    active: h2
+#  profiles:
+#    active: h2
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: {username}
+    password: {password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 
 springdoc:
   swagger-ui:
     path: /swagger
-
+    csrf:
+      enabled: true
 # App properties
 app:
   base-uri: http://localhost:8080/
@@ -25,3 +39,5 @@ app:
   #  jwt-refresh-expiration-ms: 120000 #2 min
   jwt-expiration-ms: 3600000
   jwt-refresh-expiration-ms: 86400000
+  jwt-alg: RSA
+  rsa-key-length: 2048

@@ -80,6 +80,19 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
+    public String getUserEmail(String userId) throws UsernameNotFoundException {
+        Objects.requireNonNull(userId, "user Id must not be null");
+
+        AppUser user = userRepo.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found in the database");
+        }
+
+        return user.getEmail();
+    }
+
     public <T> T getUserDto(String userId, Class<T> dtoType) {
         return modelMapper.map(loadAppUserByUserid(userId), dtoType);
     }
